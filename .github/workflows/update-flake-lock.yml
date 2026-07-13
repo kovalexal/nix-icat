@@ -1,0 +1,20 @@
+name: Update flake.lock
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # еженедельно по понедельникам
+  workflow_dispatch:
+
+jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/update-flake-lock@main
+        with:
+          pr-title: 'flake.lock: update nixpkgs'
+          pr-labels: dependencies

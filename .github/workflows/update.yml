@@ -1,0 +1,35 @@
+name: Check for ICAT updates
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # ежедневно в 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Check upstream version
+        run: nix run .#update
+      - name: Build updated package
+        run: |
+          if ! git diff --quiet pkgs/version.json; then
+            nix build .#icat -L
+          fi
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'icat: update to new upstream version'
+          title: 'icat: update to new upstream version'
+          body: |
+            Automated update from the official NVIDIA ICAT release feed
+            (`icat-public-releases` S3 bucket).
+
+            The package was built successfully in CI before this PR was opened.
+          branch: auto-update/icat
+          delete-branch: true

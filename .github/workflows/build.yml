@@ -1,0 +1,20 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Build package
+        run: nix build .#icat -L
+      - name: Check binary and desktop integration
+        run: |
+          test -x result/bin/icat
+          test -f result/share/applications/icat.desktop
+          test -f result/share/icons/hicolor/256x256/apps/icat.png
